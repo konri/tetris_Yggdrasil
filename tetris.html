@@ -20,16 +20,63 @@ var MOVE = {
 };
 
 var SHAPES = {
-    I: [[1], [1], [1], [1]],
-    J: [[1,1], [0,1], [0,1]],
-    L: [[1,1], [1,0], [1,0]],
-    O: [[1,1], [1,1]]
+	I: [
+	    [[0,0,1,0], [0,0,1,0], [0,0,1,0], [0,0,1,0]],
+	    [[0,0,0,0], [0,0,0,0], [1,1,1,1], [0,0,0,0]]
+        ], 
+    J: [
+	    [[1,1,0], [0,1,0], [0,1,0]],
+	    [[0,0,1], [1,1,1], [0,0,0]],
+	    [[0,1,0], [0,1,0], [0,1,1]],
+	    [[0,0,0], [1,1,1], [1,0,0]]
+    	],
+    L: [
+	    [[0,1,0], [0,1,0], [1,1,0]],
+	    [[1,0,0], [1,1,1], [0,0,0]],
+	    [[0,1,1], [0,1,0], [0,1,0]],
+	    [[0,0,0], [1,1,1], [0,0,1]]
+        ],
+    O: [
+    	[[1,1], [1,1]]
+    	],
+    S: [
+    	[[0,0,0], [0,1,1], [1,1,0]],
+    	[[0,1,0], [0,1,1], [1,1,1]]
+    	],
+    T: [
+    	[[0,0,0], [1,1,1], [0,1,0]],
+    	[[0,1,0], [1,1,0], [0,1,0]],
+    	[[0,1,0], [1,1,1], [0,0,0]],
+    	[[0,1,0], [0,1,1], [0,1,0]]    	
+    	],
+    Z: [
+    	[[0,0,0], [1,1,0], [0,1,1]],
+    	[[0,0,1], [0,1,1], [0,1,0]]
+    	]
 };
 
+var getShapesForBrickType = function(typeBrick) {
+    var shapeTmp;
+    switch(typeBrick) {
+        case BRICK_TYPE.I:
+            shapeTmp = SHAPES.I;
+            break;
+        case BRICK_TYPE.J:
+            shapeTmp = SHAPES.J;
+            break;
+        case BRICK_TYPE.L:
+            shapeTmp = SHAPES.L;
+            break;
+        case BRICK_TYPE.O:
+            shapeTmp = SHAPES.O;
+            break;
+    }
+    return shapeTmp;
+};
 
-function Brick(type, shape, widthBoard) {
+function Brick(type, widthBoard) {
     this.type = type;
-    this.shape = shape;
+    this.shape = getShapesForBrickType(this.type)[0]; //get first shape from array.
     this.width = widthBoard;
     this.topLeft = {row: 0 , col: widthBoard / 2}; //initial value for every brick. todo: change widthBoard
     this.potencialTopLeft = {row: this.topLeft.row, col: this.topLeft.col};
@@ -75,23 +122,7 @@ function FactoryBrick(cols) {
 
     this.createBrick = function() {
         var typeBrick = getRandomTypeBrick();
-        var shapeTmp;
-        switch(typeBrick) {
-            case BRICK_TYPE.I:
-                shapeTmp = SHAPES.I;
-                break;
-            case BRICK_TYPE.J:
-                shapeTmp = SHAPES.J;
-                break;
-            case BRICK_TYPE.L:
-                shapeTmp = SHAPES.L;
-                break;
-            case BRICK_TYPE.O:
-                shapeTmp = SHAPES.O;
-                break;
-        }
-
-        return new Brick(typeBrick, shapeTmp, this.cols);
+        return new Brick(typeBrick, this.cols);
     }
 }
 
@@ -131,7 +162,6 @@ Board.prototype.showBoard = function() {
             }
         }
     }
-
 
     for (var row in toPrintBoard) {
         for (var col in toPrintBoard[row]) {
