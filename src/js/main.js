@@ -13,7 +13,7 @@ var MOVE = {
     LEFT: 0,
     RIGHT: 1,
     DOWN: 2,
-    UP: 3
+    ROTATION: 3
 };
 
 var KEY = {
@@ -118,11 +118,11 @@ Brick.prototype.applyPotentialMove = function () {
 };
 
 Brick.prototype.potentialRotate = function () {
-    var numPossibileRotate = getShapesForBrickType(this.type).length;
-    if (potencialShape + 1 < numPossibileRotate) {
-        potencialShape++;
+    var countPossibleRotation = getShapesForBrickType(this.type).length;
+    if (this.potencialShape + 1 < countPossibleRotation) {
+        this.potencialShape++;
     } else {
-        potencialShape = 0;
+        this.potencialShape = 0;
     }
 };
 
@@ -270,6 +270,7 @@ function Game(fps) {
     this.lastRender = 0;
     this.board = new Board(16, 10);
     this.factoryBrick = new FactoryBrick(10);
+    this.keyActionQueue = [];
 }
 
 Game.prototype.update = function() {
@@ -278,16 +279,13 @@ Game.prototype.update = function() {
     var min = 0;
     var max = 2;// BRICK_TYPE.length - 1;
 
-    var move = Math.floor(Math.random()*(max-min+1)+min);
-
-    this.board.currentBrick.potentialMoveBrick(move);
-    this.board.currentBrick.potentialMoveBrick(MOVE.DOWN);
+    this.handleKeyEvents(this.keyActionQueue.shift());
 
     console.log("brick is: " + JSON.stringify(this.board.currentBrick.topLeft) + " shape is: " + this.board.currentBrick.shape);
-    console.log("move is: " + move);
 
     var isCollision = this.board.isCollision();
     console.log("iscollision: " + isCollision);
+    this.board.currentBrick.potentialMoveBrick(MOVE.DOWN);
 
     if (!isCollision) {
         this.board.currentBrick.applyPotentialMove();
@@ -317,6 +315,7 @@ Game.prototype.mainLoop = function() {
 
 Game.prototype.startGame = function() {
     console.log("startGame with fps: " + this.fps);
+    this.addEventListener();
     this.board.currentBrick = this.factoryBrick.createBrick();
     var self = this;
     this._intervalId = setInterval(function() {
@@ -331,25 +330,38 @@ Game.prototype.stopGame = function() {
 };
 
 Game.prototype.addEventListener = function () {
+    var keyActionQueue = this.keyActionQueue;
     var keyPressedEvent = function (ev) {
         switch(ev.keyCode) {
             case KEY.LEFT:
-                this.actions.push(DIR.LEFT);
+                keyActionQueue.push(MOVE.LEFT);
                 break;
             case KEY.RIGHT:
-                this.actions.push(DIR.RIGHT);
+                keyActionQueue.push(MOVE.RIGHT);
                 break;
             case KEY.UP:
-                this.actions.push(DIR.UP);
+                keyActionQueue.push(MOVE.ROTATION);
                 break;
             case KEY.DOWN:
-                this.actions.push(DIR.DOWN);
+                keyActionQueue.push(MOVE.DOWN);
                 break;
         }
         ev.preventDefault();
     }
-    document.addEventListener('keydown', keydown, false);
+    document.addEventListener('keydown', keyPressedEvent, false);
     // window.addEventListener('resize', resize, false);
+};
+
+Game.prototype.handleKeyEvents = function (keyAction) {
+    console.log("handlekeyevent: "+ keyAction);
+    if (keyAction === MOVE.LEFT || keyAction === MOVE.RIGHT || MOVE.DOWN) {
+        this.board.currentBrick.potentialMoveBrick(keyAction);
+    } else if(keyAction === MOVE.ROTATION) {
+        this.board.currentBrick.potentialRotate();
+        if (this.board.isPossibleToRotate()) {
+            this.board.currentBrick.applyRotation();
+        }
+    }
 };
 
 // function resize(event) {
