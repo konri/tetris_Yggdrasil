@@ -1,6 +1,3 @@
-<html> 
-<head>
-<script language="javascript">
 var BRICK_TYPE = {
     NO_BRICK : 0,
     I: 1,
@@ -19,49 +16,49 @@ var MOVE = {
     UP: 3
 };
 
-var KEY = { 
-    ESC: 27, 
-    SPACE: 32, 
-    LEFT: 37, 
-    UP: 38, 
-    RIGHT: 39, 
-    DOWN: 40 
+var KEY = {
+    ESC: 27,
+    SPACE: 32,
+    LEFT: 37,
+    UP: 38,
+    RIGHT: 39,
+    DOWN: 40
 };
 
 var SHAPES = {
-	I: [
-	    [[0,0,1,0], [0,0,1,0], [0,0,1,0], [0,0,1,0]],
-	    [[0,0,0,0], [0,0,0,0], [1,1,1,1], [0,0,0,0]]
-        ], 
+    I: [
+        [[0,0,1,0], [0,0,1,0], [0,0,1,0], [0,0,1,0]],
+        [[0,0,0,0], [0,0,0,0], [1,1,1,1], [0,0,0,0]]
+    ],
     J: [
-	    [[1,1,0], [0,1,0], [0,1,0]],
-	    [[0,0,1], [1,1,1], [0,0,0]],
-	    [[0,1,0], [0,1,0], [0,1,1]],
-	    [[0,0,0], [1,1,1], [1,0,0]]
-    	],
+        [[1,1,0], [0,1,0], [0,1,0]],
+        [[0,0,1], [1,1,1], [0,0,0]],
+        [[0,1,0], [0,1,0], [0,1,1]],
+        [[0,0,0], [1,1,1], [1,0,0]]
+    ],
     L: [
-	    [[0,1,0], [0,1,0], [1,1,0]],
-	    [[1,0,0], [1,1,1], [0,0,0]],
-	    [[0,1,1], [0,1,0], [0,1,0]],
-	    [[0,0,0], [1,1,1], [0,0,1]]
-        ],
+        [[0,1,0], [0,1,0], [1,1,0]],
+        [[1,0,0], [1,1,1], [0,0,0]],
+        [[0,1,1], [0,1,0], [0,1,0]],
+        [[0,0,0], [1,1,1], [0,0,1]]
+    ],
     O: [
-    	[[1,1], [1,1]]
-    	],
+        [[1,1], [1,1]]
+    ],
     S: [
-    	[[0,0,0], [0,1,1], [1,1,0]],
-    	[[0,1,0], [0,1,1], [1,1,1]]
-    	],
+        [[0,0,0], [0,1,1], [1,1,0]],
+        [[0,1,0], [0,1,1], [1,1,1]]
+    ],
     T: [
-    	[[0,0,0], [1,1,1], [0,1,0]],
-    	[[0,1,0], [1,1,0], [0,1,0]],
-    	[[0,1,0], [1,1,1], [0,0,0]],
-    	[[0,1,0], [0,1,1], [0,1,0]]    	
-    	],
+        [[0,0,0], [1,1,1], [0,1,0]],
+        [[0,1,0], [1,1,0], [0,1,0]],
+        [[0,1,0], [1,1,1], [0,0,0]],
+        [[0,1,0], [0,1,1], [0,1,0]]
+    ],
     Z: [
-    	[[0,0,0], [1,1,0], [0,1,1]],
-    	[[0,0,1], [0,1,1], [0,1,0]]
-    	]
+        [[0,0,0], [1,1,0], [0,1,1]],
+        [[0,0,1], [0,1,1], [0,1,0]]
+    ]
 };
 
 var getShapesForBrickType = function(typeBrick) {
@@ -121,20 +118,20 @@ Brick.prototype.applyPotentialMove = function () {
 };
 
 Brick.prototype.potentialRotate = function () {
-	var numPossibileRotate = getShapesForBrickType(this.type).length;
-	if (potencialShape + 1 < numPossibileRotate) {
-		potencialShape++;
-	} else {
-		potencialShape = 0;
-	}
+    var numPossibileRotate = getShapesForBrickType(this.type).length;
+    if (potencialShape + 1 < numPossibileRotate) {
+        potencialShape++;
+    } else {
+        potencialShape = 0;
+    }
 };
 
 Brick.prototype.getPotentialShape = function () {
-	return getShapesForBrickType(this.type)[this.potencialShape];
+    return getShapesForBrickType(this.type)[this.potencialShape];
 };
 
 Brick.prototype.applyRotation = function () {
-	this.shape = this.getPotentialShape();
+    this.shape = this.getPotentialShape();
 };
 
 function FactoryBrick(cols) {
@@ -221,7 +218,7 @@ Board.prototype.isCollision = function() {
                 console.log("porencialRow: " + potentialRow + " is in table: " + isInBoard);
 
                 if (!(isInBoard && this.filled[potentialRow][potentialCol] === BRICK_TYPE.NO_BRICK)) {
-                        return true;
+                    return true;
                 }
             }
         }
@@ -249,8 +246,8 @@ Board.prototype.isPossibleToGoDown = function () {
 };
 
 Board.prototype.isPossibleToRotate = function () {
-	var potentialShape = this.currentBrick.getPotentialShape();
-	 for (var row in potentialShape) {
+    var potentialShape = this.currentBrick.getPotentialShape();
+    for (var row in potentialShape) {
         for (var col in potentialShape[row]) {
             if (potentialShape[row][col] !== 0) {
                 var potentialRow = parseInt(row) + parseInt(this.currentBrick.potencialTopLeft.row);
@@ -334,10 +331,10 @@ Game.prototype.stopGame = function() {
 };
 
 Game.prototype.addEventListener = function () {
-      var keyPressedEvent = function (ev) {
+    var keyPressedEvent = function (ev) {
         switch(ev.keyCode) {
-            case KEY.LEFT: 
-                this.actions.push(DIR.LEFT);  
+            case KEY.LEFT:
+                this.actions.push(DIR.LEFT);
                 break;
             case KEY.RIGHT:
                 this.actions.push(DIR.RIGHT);
@@ -346,32 +343,26 @@ Game.prototype.addEventListener = function () {
                 this.actions.push(DIR.UP);
                 break;
             case KEY.DOWN:
-                this.actions.push(DIR.DOWN); 
+                this.actions.push(DIR.DOWN);
                 break;
-            }
-            ev.preventDefault(); 
+        }
+        ev.preventDefault();
     }
-      document.addEventListener('keydown', keydown, false);
-      // window.addEventListener('resize', resize, false);
+    document.addEventListener('keydown', keydown, false);
+    // window.addEventListener('resize', resize, false);
 };
 
-    // function resize(event) {
-    //   canvas.width   = canvas.clientWidth;  // set canvas logical size equal to its physical size
-    //   canvas.height  = canvas.clientHeight; // (ditto)
-    //   ucanvas.width  = ucanvas.clientWidth;
-    //   ucanvas.height = ucanvas.clientHeight;
-    //   dx = canvas.width  / nx; // pixel size of a single tetris block
-    //   dy = canvas.height / ny; // (ditto)
-    //   invalidate();
-    //   invalidateNext();
-    // }
+// function resize(event) {
+//   canvas.width   = canvas.clientWidth;  // set canvas logical size equal to its physical size
+//   canvas.height  = canvas.clientHeight; // (ditto)
+//   ucanvas.width  = ucanvas.clientWidth;
+//   ucanvas.height = ucanvas.clientHeight;
+//   dx = canvas.width  / nx; // pixel size of a single tetris block
+//   dy = canvas.height / ny; // (ditto)
+//   invalidate();
+//   invalidateNext();
+// }
 
-  
+
 var game = new Game(2);
 game.startGame();
-
-</script>
-</head>
-<body>
-</body>
-</head>0
