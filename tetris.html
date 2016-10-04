@@ -80,7 +80,7 @@ function Brick(type, widthBoard) {
     this.width = widthBoard;
     this.topLeft = {row: 0 , col: widthBoard / 2}; //initial value for every brick. todo: change widthBoard
     this.potencialTopLeft = {row: this.topLeft.row, col: this.topLeft.col};
-    this.potencialShape = [];
+    this.potencialShape = 0;
 }
 
 Brick.prototype.potentialMoveBrick = function (move) {
@@ -109,6 +109,23 @@ Brick.prototype.resetPotentialMove = function () {
 Brick.prototype.applyPotentialMove = function () {
     this.topLeft.row = this.potencialTopLeft.row;
     this.topLeft.col = this.potencialTopLeft.col;
+};
+
+Brick.prototype.potentialRotate = function () {
+	var numPossibileRotate = getShapesForBrickType(this.type).length;
+	if (potencialShape + 1 < numPossibileRotate) {
+		potencialShape++;
+	} else {
+		potencialShape = 0;
+	}
+};
+
+Brick.prototype.getPotentialShape = function () {
+	return getShapesForBrickType(this.type)[this.potencialShape];
+};
+
+Brick.prototype.applyRotation = function () {
+	this.shape = this.getPotentialShape();
 };
 
 function FactoryBrick(cols) {
@@ -221,6 +238,25 @@ Board.prototype.isPossibleToGoDown = function () {
     }
     return true;
 };
+
+Board.prototype.isPossibleToRotate = function () {
+	var potentialShape = this.currentBrick.getPotentialShape();
+	 for (var row in potentialShape) {
+        for (var col in potentialShape[row]) {
+            if (potentialShape[row][col] !== 0) {
+                var potentialRow = parseInt(row) + parseInt(this.currentBrick.potencialTopLeft.row);
+                var potentialCol = parseInt(col) + parseInt(this.currentBrick.potencialTopLeft.col);
+                var isInBoard = this.isInBoard(potentialRow, potentialCol);
+                console.log("porencialRow: " + potentialRow + " is in table: " + isInBoard);
+
+                if (!(isInBoard && this.filled[potentialRow][potentialCol] === BRICK_TYPE.NO_BRICK)) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
 
 function Game(fps) {
     this.fps = fps;
