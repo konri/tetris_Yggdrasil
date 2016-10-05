@@ -368,14 +368,16 @@ Game.prototype.addEventListener = function () {
 
 Game.prototype.handleKeyEvents = function (keyAction) {
     console.log("handlekeyevent: "+ keyAction);
-    if (keyAction === MOVE.LEFT || keyAction === MOVE.RIGHT || MOVE.DOWN) {
+    if (keyAction === MOVE.LEFT || keyAction === MOVE.RIGHT || keyAction === MOVE.DOWN) {
         this.board.currentBrick.potentialMoveBrick(keyAction);
     } else if(keyAction === MOVE.ROTATION) {
+        console.log("ROTATION");
         this.board.currentBrick.potentialRotate();
         if (this.board.isPossibleToRotate()) {
             this.board.currentBrick.applyRotation();
         }
     }
+
 };
 
 // function resize(event) {
