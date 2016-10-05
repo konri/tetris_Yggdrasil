@@ -80,6 +80,10 @@ var getShapesForBrickType = function(typeBrick) {
     return shapeTmp;
 };
 
+var getTimestamp = function () { 
+    return new Date().getTime();
+};
+
 function Brick(type, widthBoard) {
     this.type = type;
     this.shape = getShapesForBrickType(this.type)[0]; //get first shape from array.
@@ -159,8 +163,8 @@ function Board(rows, cols) {
         return x;
     }
 
-    this.rows = rows;
-    this.cols = cols;
+    this.height = rows;
+    this.width = cols;
     this.filled = this.private.createBoard(rows, cols);
     this.currentBrick = null;
 }
@@ -208,26 +212,26 @@ Board.prototype.fillBrickInBoard = function() {
 };
 
 
-Board.prototype.isCollision = function() {
+Board.prototype.isPossibleToMove = function() {
     for (var row in this.currentBrick.shape) {
         for (var col in this.currentBrick.shape[row]) {
-            if (this.currentBrick.shape[row][col] !== 0) {
+            if (this.currentBrick.shape[row][col] !== BRICK_TYPE.NO_BRICK) {
                 var potentialRow = parseInt(row) + parseInt(this.currentBrick.potencialTopLeft.row);
                 var potentialCol = parseInt(col) + parseInt(this.currentBrick.potencialTopLeft.col);
                 var isInBoard = this.isInBoard(potentialRow, potentialCol);
                 console.log("porencialRow: " + potentialRow + " is in table: " + isInBoard);
 
                 if (!(isInBoard && this.filled[potentialRow][potentialCol] === BRICK_TYPE.NO_BRICK)) {
-                    return true;
+                    return false;
                 }
             }
         }
     }
-    return false;
+    return true;
 };
 
 Board.prototype.isInBoard = function(row, col) {
-    return col >= 0 && col < this.cols && row < this.filled.length;
+    return col >= 0 && col < this.width  && row < this.height;
 };
 
 Board.prototype.isPossibleToGoDown = function () {
@@ -267,13 +271,16 @@ Board.prototype.isPossibleToRotate = function () {
 function Game(fps) {
     this.fps = fps;
     this._intervalId = -1;
-    this.lastRender = 0;
+    this.lastTimeRender = 0;
+    this.dt = 0;
+    this.stepSecond = 0.5;
     this.board = new Board(16, 10);
     this.factoryBrick = new FactoryBrick(10);
     this.keyActionQueue = [];
-}
 
-Game.prototype.update = function() {
+
+}
+Game.prototype.update = function(idt) {
 
     //to testing
     var min = 0;
@@ -281,13 +288,15 @@ Game.prototype.update = function() {
 
     this.handleKeyEvents(this.keyActionQueue.shift());
 
-    console.log("brick is: " + JSON.stringify(this.board.currentBrick.topLeft) + " shape is: " + this.board.currentBrick.shape);
+    console.log("brick is: " + JSON.stringify(this.board.currentBrick.topLeft) + " shape is: " + JSON.stringify(this.board.currentBrick.shape));
+    
+    this.dt += idt;
+    if (this.dt >= this.stepSecond) {
+        this.dt -= this.stepSecond;
+        this.board.currentBrick.potentialMoveBrick(MOVE.DOWN);    
+    } 
 
-    var isCollision = this.board.isCollision();
-    console.log("iscollision: " + isCollision);
-    this.board.currentBrick.potentialMoveBrick(MOVE.DOWN);
-
-    if (!isCollision) {
+    if (this.board.isPossibleToMove()) {
         this.board.currentBrick.applyPotentialMove();
     } else {
         var isPossibleToGoDown = this.board.isPossibleToGoDown();
@@ -309,14 +318,19 @@ Game.prototype.draw = function() {
 
 Game.prototype.mainLoop = function() {
     console.log("-------------------------------------------------------------------------------------------");
-    this.update();
+    var now = getTimestamp();
+    var tmp = Math.min(1, (now - this.lastTimeRender) / 1000.00)
+        console.log("last time: " + this.lastTimeRender +  " time is :"  + now + " send to update: " + tmp);
+    this.update(tmp);
     this.draw();
+    this.lastTimeRender = now;
 };
 
 Game.prototype.startGame = function() {
     console.log("startGame with fps: " + this.fps);
     this.addEventListener();
     this.board.currentBrick = this.factoryBrick.createBrick();
+    this.lastTimeRender = getTimestamp();
     var self = this;
     this._intervalId = setInterval(function() {
         self.mainLoop();
@@ -376,5 +390,5 @@ Game.prototype.handleKeyEvents = function (keyAction) {
 // }
 
 
-var game = new Game(2);
+var game = new Game(30);
 game.startGame();
