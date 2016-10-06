@@ -108,14 +108,10 @@ function Brick(type, widthBoard) {
 Brick.prototype.potentialMoveBrick = function (move) {
     switch (move) {
         case MOVE.LEFT:
-            if (this.topLeft.col > 1) {
-                this.potencialTopLeft.col -= 1;
-            }
+            this.potencialTopLeft.col -= 1;
             break;
         case MOVE.RIGHT:
-            if (this.topLeft.col < this.width - 1) {
-                this.potencialTopLeft.col += 1;
-            }
+            this.potencialTopLeft.col += 1;
             break;
         case MOVE.DOWN:
             this.potencialTopLeft.row += 1;
@@ -248,7 +244,7 @@ Board.prototype.isPossibleToMove = function() {
                 var potentialRow = parseInt(row) + parseInt(this.currentBrick.potencialTopLeft.row);
                 var potentialCol = parseInt(col) + parseInt(this.currentBrick.potencialTopLeft.col);
                 var isInBoard = this.isInBoard(potentialRow, potentialCol);
-                console.log("porencialRow: " + potentialRow + " is in table: " + isInBoard);
+                console.log("potencialCol: " + potentialCol + " is in table: " + isInBoard);
 
                 if (!(isInBoard && this.filled[potentialRow][potentialCol] === BRICK_TYPE.NO_BRICK)) {
                     return false;
@@ -264,15 +260,36 @@ Board.prototype.isInBoard = function(row, col) {
 };
 
 Board.prototype.isPossibleToGoDown = function () {
+    var checkLastRow = function (row) {
+        for (var i in row) {
+            if (row[i] !== BRICK_TYPE.NO_BRICK) {
+                return true;
+            }
+        }
+        return false;
+    };
+
     this.currentBrick.resetPotentialMove();
     this.currentBrick.potentialMoveBrick(MOVE.DOWN);
-    var lastIndex = this.currentBrick.shape.length - 1;
-    for (var col in this.currentBrick.shape[lastIndex]) {
-        var potentialRow = parseInt(lastIndex) + parseInt(this.currentBrick.potencialTopLeft.row);
-        var potentialCol = parseInt(col) + parseInt(this.currentBrick.potencialTopLeft.col);
-        var isInBoard = this.isInBoard(potentialRow, potentialCol);
-        if (!(isInBoard && this.filled[potentialRow][potentialCol] === BRICK_TYPE.NO_BRICK)) {
-            return false;
+    var tmpShape = this.currentBrick.shape.slice(0, this.currentBrick.shape.length);
+    var lastShapeRow;
+
+    do {
+        var tryRow = tmpShape.pop();
+        if (checkLastRow(tryRow)) {
+            lastShapeRow = tryRow;
+            break;
+        }
+    } while (tmpShape.length > 0);
+
+    for (var col in lastShapeRow) {
+        if (lastShapeRow[col] !== BRICK_TYPE.NO_BRICK) {
+            var potentialRow = parseInt(this.currentBrick.shape.length - 1) + parseInt(this.currentBrick.potencialTopLeft.row);
+            var potentialCol = parseInt(col) + parseInt(this.currentBrick.potencialTopLeft.col);
+            var isInBoard = this.isInBoard(potentialRow, potentialCol);
+            if (!(isInBoard && this.filled[potentialRow][potentialCol] === BRICK_TYPE.NO_BRICK)) {
+                return false;
+            }
         }
     }
     return true;
@@ -327,6 +344,7 @@ Game.prototype.update = function(idt) {
         var isPossibleToGoDown = this.board.isPossibleToGoDown();
         console.log("possible touch: " + isPossibleToGoDown);
         if (isPossibleToGoDown) {
+
             console.log("possible to go down: ");
             this.board.currentBrick.applyPotentialMove();
         } else {
