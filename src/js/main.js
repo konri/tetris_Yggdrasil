@@ -47,7 +47,7 @@ var SHAPES = {
     ],
     S: [
         [[0,0,0], [0,1,1], [1,1,0]],
-        [[0,1,0], [0,1,1], [1,1,1]]
+        [[0,1,0], [0,1,1], [0,0,1]]
     ],
     T: [
         [[0,0,0], [1,1,1], [0,1,0]],
@@ -60,6 +60,9 @@ var SHAPES = {
         [[0,0,1], [0,1,1], [0,1,0]]
     ]
 };
+
+
+
 
 var getShapesForBrickType = function(typeBrick) {
     var shapeTmp;
@@ -76,11 +79,20 @@ var getShapesForBrickType = function(typeBrick) {
         case BRICK_TYPE.O:
             shapeTmp = SHAPES.O;
             break;
+        case BRICK_TYPE.S:
+            shapeTmp = SHAPES.S;
+            break;
+        case BRICK_TYPE.T:
+            shapeTmp = SHAPES.T;
+            break;
+        case BRICK_TYPE.Z:
+            shapeTmp = SHAPES.Z;
+            break;
     }
     return shapeTmp;
 };
 
-var getTimestamp = function () { 
+var getTimestamp = function () {
     return new Date().getTime();
 };
 
@@ -143,7 +155,7 @@ function FactoryBrick(cols) {
 
     var getRandomTypeBrick = function() {
         var min = 1;
-        var max = 4;// BRICK_TYPE.length - 1;
+        var max = 7;// BRICK_TYPE.length - 1;
         return Math.floor(Math.random()*(max-min+1)+min);
     };
 
@@ -170,7 +182,19 @@ function Board(rows, cols) {
 }
 
 Board.prototype.showBoard = function() {
-    var printBoard = "";
+
+    var img_create = function(src) {
+        var img= new Image();
+        img.src= "img/block_" + src + ".png";
+        img.width = 45;
+        img.height = 45;
+        return img;
+    };
+
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+
+
 
     var toPrintBoard = this.private.createBoard(16,10);
 
@@ -190,13 +214,18 @@ Board.prototype.showBoard = function() {
         }
     }
 
+
+    var imgHeight = 45;
+    var paddingHeight = 2;
+    var paddingWidth = 2;
     for (var row in toPrintBoard) {
+        var y = row * imgHeight + row * paddingHeight;
         for (var col in toPrintBoard[row]) {
-            printBoard += " " + toPrintBoard[row][col];
+            var img = img_create(toPrintBoard[row][col]);
+            var x = col * img.width + col * paddingWidth;
+            ctx.drawImage(img,x,y);
         }
-        printBoard += "\n";
     }
-    console.log(printBoard);
 };
 
 Board.prototype.fillBrickInBoard = function() {
@@ -282,19 +311,15 @@ function Game(fps) {
 }
 Game.prototype.update = function(idt) {
 
-    //to testing
-    var min = 0;
-    var max = 2;// BRICK_TYPE.length - 1;
-
     this.handleKeyEvents(this.keyActionQueue.shift());
 
     console.log("brick is: " + JSON.stringify(this.board.currentBrick.topLeft) + " shape is: " + JSON.stringify(this.board.currentBrick.shape));
-    
+
     this.dt += idt;
     if (this.dt >= this.stepSecond) {
         this.dt -= this.stepSecond;
-        this.board.currentBrick.potentialMoveBrick(MOVE.DOWN);    
-    } 
+        this.board.currentBrick.potentialMoveBrick(MOVE.DOWN);
+    }
 
     if (this.board.isPossibleToMove()) {
         this.board.currentBrick.applyPotentialMove();

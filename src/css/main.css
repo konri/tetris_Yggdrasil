@@ -272,3 +272,33 @@ textarea {
         page-break-after: avoid;
     }
 }
+
+body {
+    background-image: url('../img/background.jpg');
+    width:100%;
+    height:100%;
+}
+
+.board {
+    width:493px;
+    height:772px;
+    background-image: url('../img/board.png');
+}
+.board_usage {
+    margin-left: 12px;
+
+    padding-top: 10px;
+}
+
+.block {
+    width: 45px;
+    height: 45px;
+}
+
+.block .b0 {
+    background-image: url('../img/block_0.png');
+}
+.block .b1{
+    background-image: url('../img/block_1.png');
+}
+
