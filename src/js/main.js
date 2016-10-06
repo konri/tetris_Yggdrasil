@@ -1,5 +1,5 @@
 var BRICK_TYPE = {
-    NO_BRICK : 0,
+    NO_BRICK: 0,
     I: 1,
     J: 2,
     L: 3,
@@ -27,46 +27,44 @@ var KEY = {
 
 var SHAPES = {
     I: [
-        [[0,0,1,0], [0,0,1,0], [0,0,1,0], [0,0,1,0]],
-        [[0,0,0,0], [0,0,0,0], [1,1,1,1], [0,0,0,0]]
+        [[0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0], [0, 0, 1, 0]],
+        [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]]
     ],
     J: [
-        [[1,1,0], [0,1,0], [0,1,0]],
-        [[0,0,1], [1,1,1], [0,0,0]],
-        [[0,1,0], [0,1,0], [0,1,1]],
-        [[0,0,0], [1,1,1], [1,0,0]]
+        [[1, 1, 0], [0, 1, 0], [0, 1, 0]],
+        [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
+        [[0, 1, 0], [0, 1, 0], [0, 1, 1]],
+        [[0, 0, 0], [1, 1, 1], [1, 0, 0]]
     ],
     L: [
-        [[0,1,0], [0,1,0], [1,1,0]],
-        [[1,0,0], [1,1,1], [0,0,0]],
-        [[0,1,1], [0,1,0], [0,1,0]],
-        [[0,0,0], [1,1,1], [0,0,1]]
+        [[0, 1, 0], [0, 1, 0], [1, 1, 0]],
+        [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
+        [[0, 1, 1], [0, 1, 0], [0, 1, 0]],
+        [[0, 0, 0], [1, 1, 1], [0, 0, 1]]
     ],
     O: [
-        [[1,1], [1,1]]
+        [[1, 1], [1, 1]]
     ],
     S: [
-        [[0,0,0], [0,1,1], [1,1,0]],
-        [[0,1,0], [0,1,1], [0,0,1]]
+        [[0, 0, 0], [0, 1, 1], [1, 1, 0]],
+        [[0, 1, 0], [0, 1, 1], [0, 0, 1]]
     ],
     T: [
-        [[0,0,0], [1,1,1], [0,1,0]],
-        [[0,1,0], [1,1,0], [0,1,0]],
-        [[0,1,0], [1,1,1], [0,0,0]],
-        [[0,1,0], [0,1,1], [0,1,0]]
+        [[0, 0, 0], [1, 1, 1], [0, 1, 0]],
+        [[0, 1, 0], [1, 1, 0], [0, 1, 0]],
+        [[0, 1, 0], [1, 1, 1], [0, 0, 0]],
+        [[0, 1, 0], [0, 1, 1], [0, 1, 0]]
     ],
     Z: [
-        [[0,0,0], [1,1,0], [0,1,1]],
-        [[0,0,1], [0,1,1], [0,1,0]]
+        [[0, 0, 0], [1, 1, 0], [0, 1, 1]],
+        [[0, 0, 1], [0, 1, 1], [0, 1, 0]]
     ]
 };
 
 
-
-
-var getShapesForBrickType = function(typeBrick) {
+var getShapesForBrickType = function (typeBrick) {
     var shapeTmp;
-    switch(typeBrick) {
+    switch (typeBrick) {
         case BRICK_TYPE.I:
             shapeTmp = SHAPES.I;
             break;
@@ -100,7 +98,7 @@ function Brick(type, widthBoard) {
     this.type = type;
     this.shape = getShapesForBrickType(this.type)[0]; //get first shape from array.
     this.width = widthBoard;
-    this.topLeft = {row: 0 , col: widthBoard / 2}; //initial value for every brick. todo: change widthBoard
+    this.topLeft = {row: 0, col: widthBoard / 2}; //initial value for every brick. todo: change widthBoard
     this.potencialTopLeft = {row: this.topLeft.row, col: this.topLeft.col};
     this.potencialShape = 0;
 }
@@ -149,13 +147,13 @@ Brick.prototype.applyRotation = function () {
 function FactoryBrick(cols) {
     this.cols = cols;
 
-    var getRandomTypeBrick = function() {
+    var getRandomTypeBrick = function () {
         var min = 1;
         var max = 7;// BRICK_TYPE.length - 1;
-        return Math.floor(Math.random()*(max-min+1)+min);
+        return Math.floor(Math.random() * (max - min + 1) + min);
     };
 
-    this.createBrick = function() {
+    this.createBrick = function () {
         var typeBrick = getRandomTypeBrick();
         return new Brick(typeBrick, this.cols);
     }
@@ -163,7 +161,7 @@ function FactoryBrick(cols) {
 
 function Board(rows, cols) {
     this.private = {};
-    this.private.createBoard = function(row, cols) {
+    this.private.createBoard = function (row, cols) {
         var x = new Array(row);
         for (var i = 0; i < x.length; i++) {
             x[i] = new Array(cols).fill(BRICK_TYPE.NO_BRICK);
@@ -177,11 +175,11 @@ function Board(rows, cols) {
     this.currentBrick = null;
 }
 
-Board.prototype.showBoard = function() {
+Board.prototype.showBoard = function () {
 
-    var img_create = function(src) {
-        var img= new Image();
-        img.src= "img/block_" + src + ".png";
+    var img_create = function (src) {
+        var img = new Image();
+        img.src = "img/block_" + src + ".png";
         img.width = 45;
         img.height = 45;
         return img;
@@ -191,8 +189,7 @@ Board.prototype.showBoard = function() {
     var ctx = c.getContext("2d");
 
 
-
-    var toPrintBoard = this.private.createBoard(16,10);
+    var toPrintBoard = this.private.createBoard(16, 10);
 
     for (var row in this.filled) {
         for (var col in this.filled[row]) {
@@ -219,12 +216,12 @@ Board.prototype.showBoard = function() {
         for (var col in toPrintBoard[row]) {
             var img = img_create(toPrintBoard[row][col]);
             var x = col * img.width + col * paddingWidth;
-            ctx.drawImage(img,x,y);
+            ctx.drawImage(img, x, y);
         }
     }
 };
 
-Board.prototype.fillBrickInBoard = function() {
+Board.prototype.fillBrickInBoard = function () {
     for (var row in this.currentBrick.shape) {
         for (var col in this.currentBrick.shape[row]) {
             if (this.currentBrick.shape[row][col] !== BRICK_TYPE.NO_BRICK) {
@@ -237,7 +234,7 @@ Board.prototype.fillBrickInBoard = function() {
 };
 
 
-Board.prototype.isPossibleToMove = function() {
+Board.prototype.isPossibleToMove = function () {
     for (var row in this.currentBrick.shape) {
         for (var col in this.currentBrick.shape[row]) {
             if (this.currentBrick.shape[row][col] !== BRICK_TYPE.NO_BRICK) {
@@ -255,8 +252,8 @@ Board.prototype.isPossibleToMove = function() {
     return true;
 };
 
-Board.prototype.isInBoard = function(row, col) {
-    return col >= 0 && col < this.width  && row < this.height;
+Board.prototype.isInBoard = function (row, col) {
+    return col >= 0 && col < this.width && row < this.height;
 };
 
 Board.prototype.isPossibleToGoDown = function () {
@@ -326,7 +323,7 @@ function Game(fps) {
 
 
 }
-Game.prototype.update = function(idt) {
+Game.prototype.update = function (idt) {
 
     this.handleKeyEvents(this.keyActionQueue.shift());
 
@@ -355,32 +352,32 @@ Game.prototype.update = function(idt) {
     }
 };
 
-Game.prototype.draw = function() {
+Game.prototype.draw = function () {
     this.board.showBoard();
 };
 
-Game.prototype.mainLoop = function() {
+Game.prototype.mainLoop = function () {
     console.log("-------------------------------------------------------------------------------------------");
     var now = getTimestamp();
     var tmp = Math.min(1, (now - this.lastTimeRender) / 1000.00)
-        console.log("last time: " + this.lastTimeRender +  " time is :"  + now + " send to update: " + tmp);
+    console.log("last time: " + this.lastTimeRender + " time is :" + now + " send to update: " + tmp);
     this.update(tmp);
     this.draw();
     this.lastTimeRender = now;
 };
 
-Game.prototype.startGame = function() {
+Game.prototype.startGame = function () {
     console.log("startGame with fps: " + this.fps);
     this.addEventListener();
     this.board.currentBrick = this.factoryBrick.createBrick();
     this.lastTimeRender = getTimestamp();
     var self = this;
-    this._intervalId = setInterval(function() {
+    this._intervalId = setInterval(function () {
         self.mainLoop();
     }, 1000 / this.fps);
 };
 
-Game.prototype.stopGame = function() {
+Game.prototype.stopGame = function () {
     if (this._intervalId !== -1) {
         clearInterval(this._intervalId);
     }
@@ -389,7 +386,7 @@ Game.prototype.stopGame = function() {
 Game.prototype.addEventListener = function () {
     var keyActionQueue = this.keyActionQueue;
     var keyPressedEvent = function (ev) {
-        switch(ev.keyCode) {
+        switch (ev.keyCode) {
             case KEY.LEFT:
                 keyActionQueue.push(MOVE.LEFT);
                 break;
@@ -410,10 +407,10 @@ Game.prototype.addEventListener = function () {
 };
 
 Game.prototype.handleKeyEvents = function (keyAction) {
-    console.log("handlekeyevent: "+ keyAction);
+    console.log("handlekeyevent: " + keyAction);
     if (keyAction === MOVE.LEFT || keyAction === MOVE.RIGHT || keyAction === MOVE.DOWN) {
         this.board.currentBrick.potentialMoveBrick(keyAction);
-    } else if(keyAction === MOVE.ROTATION) {
+    } else if (keyAction === MOVE.ROTATION) {
         console.log("ROTATION");
         this.board.currentBrick.potentialRotate();
         if (this.board.isPossibleToRotate()) {
