@@ -311,6 +311,38 @@ Board.prototype.isPossibleToRotate = function () {
     return true;
 }
 
+Board.prototype.checkFillInRows = function () {
+    var rowToDelete = [];
+    
+    var isRowFullFill = function (row) {
+        for (var i in row) {
+            if (row[i] === BRICK_TYPE.NO_BRICK) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    var createEmptyLine = function () {
+        return new Array(this.width).fill(BRICK_TYPE.NO_BRICK);
+    };
+
+    for (var row in this.filled) {
+        console.log("pkb row: " + this.filled[row])
+        if (isRowFullFill(this.filled[row])) {
+            console.log("pkb add row : " + row);
+            rowToDelete.push(row);
+        }
+    }
+
+    console.log("pkb rowToDelete" + rowToDelete);
+
+    for (var rowDelete in rowToDelete) {
+        this.filled.splice(rowToDelete[rowDelete], 1);   
+        this.filled.unshift(createEmptyLine());
+    }
+}
+
 function Game(fps) {
     this.fps = fps;
     this._intervalId = -1;
@@ -346,7 +378,9 @@ Game.prototype.update = function (idt) {
             this.board.currentBrick.applyPotentialMove();
         } else {
             console.log("nie ma miejsca dawaj nastepne gienka");
+            
             this.board.fillBrickInBoard();
+            this.board.checkFillInRows();
             this.board.currentBrick = this.factoryBrick.createBrick();
         }
     }
