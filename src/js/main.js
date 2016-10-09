@@ -13,7 +13,8 @@ var MOVE = {
     LEFT: 0,
     RIGHT: 1,
     DOWN: 2,
-    ROTATION: 3
+    ROTATION: 3,
+    PAUSE: 4
 };
 
 var KEY = {
@@ -96,9 +97,10 @@ var getTimestamp = function () {
 
 function Brick(type, widthBoard) {
     this.type = type;
-    this.shape = getShapesForBrickType(this.type)[0]; //get first shape from array.
+    this.shape = getShapesForBrickType(this.type)[0];
     this.width = widthBoard;
-    this.topLeft = {row: 0, col: widthBoard / 2}; //initial value for every brick. todo: change widthBoard
+    var center = Math.round(this.width / 2);
+    this.topLeft = {row: 0, col: widthBoard / 2};
     this.potencialTopLeft = {row: this.topLeft.row, col: this.topLeft.col};
     this.potencialShape = 0;
 }
@@ -149,7 +151,7 @@ function FactoryBrick(cols) {
 
     var getRandomTypeBrick = function () {
         var min = 1;
-        var max = 7;// BRICK_TYPE.length - 1;
+        var max = 7;
         return Math.floor(Math.random() * (max - min + 1) + min);
     };
 
@@ -175,21 +177,34 @@ function Board(rows, cols) {
     this.currentBrick = null;
 }
 
+Board.prototype.getAbsoluteCoordinates = function (row, col) {
+    var absoluteRow = parseInt(row) + parseInt(this.currentBrick.topLeft.row);
+    var absoluteCol = parseInt(col) + parseInt(this.currentBrick.topLeft.col);
+    return {row: absoluteRow, col: absoluteCol};
+};
+
+Board.prototype.getPotentialAbsoluteCoordinates = function (row, col) {
+    var absoluteRow = parseInt(row) + parseInt(this.currentBrick.potencialTopLeft.row);
+    var absoluteCol = parseInt(col) + parseInt(this.currentBrick.potencialTopLeft.col);
+    return {row: absoluteRow, col: absoluteCol};
+};
+
 Board.prototype.showBoard = function () {
+    var c = document.getElementById("boardCanvas");
+    var ctx = c.getContext("2d");
+    var imgDimension = 45;
+    var paddingHeight = 2;
+    var paddingWidth = 2;
 
     var img_create = function (src) {
         var img = new Image();
         img.src = "img/block_" + src + ".png";
-        img.width = 45;
-        img.height = 45;
+        img.width = imgDimension;
+        img.height = imgDimension;
         return img;
     };
 
-    var c = document.getElementById("myCanvas");
-    var ctx = c.getContext("2d");
-
-
-    var toPrintBoard = this.private.createBoard(16, 10);
+    var toPrintBoard = this.private.createBoard(16,10);
 
     for (var row in this.filled) {
         for (var col in this.filled[row]) {
@@ -200,19 +215,14 @@ Board.prototype.showBoard = function () {
     for (var row in this.currentBrick.shape) {
         for (var col in this.currentBrick.shape[row]) {
             if (this.currentBrick.shape[row][col] !== BRICK_TYPE.NO_BRICK) {
-                var rowDraw = parseInt(row) + parseInt(this.currentBrick.topLeft.row);
-                var colDraw = parseInt(col) + parseInt(this.currentBrick.topLeft.col);
-                toPrintBoard[rowDraw][colDraw] = this.currentBrick.type;
+                var coordinates = this.getAbsoluteCoordinates(row, col);
+                toPrintBoard[coordinates.row][coordinates.col] = this.currentBrick.type;
             }
         }
     }
 
-
-    var imgHeight = 45;
-    var paddingHeight = 2;
-    var paddingWidth = 2;
     for (var row in toPrintBoard) {
-        var y = row * imgHeight + row * paddingHeight;
+        var y = row * imgDimension + row * paddingHeight;
         for (var col in toPrintBoard[row]) {
             var img = img_create(toPrintBoard[row][col]);
             var x = col * img.width + col * paddingWidth;
@@ -225,25 +235,20 @@ Board.prototype.fillBrickInBoard = function () {
     for (var row in this.currentBrick.shape) {
         for (var col in this.currentBrick.shape[row]) {
             if (this.currentBrick.shape[row][col] !== BRICK_TYPE.NO_BRICK) {
-                var rowDraw = parseInt(row) + parseInt(this.currentBrick.topLeft.row);
-                var colDraw = parseInt(col) + parseInt(this.currentBrick.topLeft.col);
-                this.filled[rowDraw][colDraw] = this.currentBrick.type;
+                var coordinates = this.getAbsoluteCoordinates(row, col);
+                this.filled[coordinates.row][coordinates.col] = this.currentBrick.type;
             }
         }
     }
 };
 
-
 Board.prototype.isPossibleToMove = function () {
     for (var row in this.currentBrick.shape) {
         for (var col in this.currentBrick.shape[row]) {
             if (this.currentBrick.shape[row][col] !== BRICK_TYPE.NO_BRICK) {
-                var potentialRow = parseInt(row) + parseInt(this.currentBrick.potencialTopLeft.row);
-                var potentialCol = parseInt(col) + parseInt(this.currentBrick.potencialTopLeft.col);
-                var isInBoard = this.isInBoard(potentialRow, potentialCol);
-                console.log("potencialCol: " + potentialCol + " is in table: " + isInBoard);
-
-                if (!(isInBoard && this.filled[potentialRow][potentialCol] === BRICK_TYPE.NO_BRICK)) {
+                var coordinates = this.getPotentialAbsoluteCoordinates(row, col);
+                var isInBoard = this.isInBoard(coordinates.row, coordinates.col);
+                if (!(isInBoard && this.filled[coordinates.row][coordinates.col] === BRICK_TYPE.NO_BRICK)) {
                     return false;
                 }
             }
@@ -309,11 +314,11 @@ Board.prototype.isPossibleToRotate = function () {
         }
     }
     return true;
-}
+};
 
 Board.prototype.checkFillInRows = function () {
     var rowToDelete = [];
-    
+
     var isRowFullFill = function (row) {
         for (var i in row) {
             if (row[i] === BRICK_TYPE.NO_BRICK) {
@@ -321,10 +326,6 @@ Board.prototype.checkFillInRows = function () {
             }
         }
         return true;
-    };
-
-    var createEmptyLine = function () {
-        return new Array(this.width).fill(BRICK_TYPE.NO_BRICK);
     };
 
     for (var row in this.filled) {
@@ -337,28 +338,27 @@ Board.prototype.checkFillInRows = function () {
 
     console.log("pkb rowToDelete" + rowToDelete);
 
-    for (var rowDelete in rowToDelete) {
-        this.filled.splice(rowToDelete[rowDelete], 1);   
-        this.filled.unshift(createEmptyLine());
+    while (rowToDelete.length > 0) {
+        var rowDelete = rowToDelete.pop();
+        this.filled.splice(rowDelete, 1);
+        var emptyLine = new Array(this.width).fill(BRICK_TYPE.NO_BRICK);
+        this.filled.unshift(emptyLine);
     }
-}
+};
 
 function Game(fps) {
     this.fps = fps;
-    this._intervalId = -1;
     this.lastTimeRender = 0;
     this.dt = 0;
     this.stepSecond = 0.5;
+    this.isPlay = true;
     this.board = new Board(16, 10);
     this.factoryBrick = new FactoryBrick(10);
     this.keyActionQueue = [];
-
-
+    this.nextBrick = null;
 }
+
 Game.prototype.update = function (idt) {
-
-    this.handleKeyEvents(this.keyActionQueue.shift());
-
     console.log("brick is: " + JSON.stringify(this.board.currentBrick.topLeft) + " shape is: " + JSON.stringify(this.board.currentBrick.shape));
 
     this.dt += idt;
@@ -377,11 +377,10 @@ Game.prototype.update = function (idt) {
             console.log("possible to go down: ");
             this.board.currentBrick.applyPotentialMove();
         } else {
-            console.log("nie ma miejsca dawaj nastepne gienka");
-            
             this.board.fillBrickInBoard();
             this.board.checkFillInRows();
             this.board.currentBrick = this.factoryBrick.createBrick();
+            this.checkEndGame();
         }
     }
 };
@@ -395,26 +394,35 @@ Game.prototype.mainLoop = function () {
     var now = getTimestamp();
     var tmp = Math.min(1, (now - this.lastTimeRender) / 1000.00)
     console.log("last time: " + this.lastTimeRender + " time is :" + now + " send to update: " + tmp);
-    this.update(tmp);
-    this.draw();
+    this.handleKeyEvents(this.keyActionQueue.shift());
+    if (this.isPlay) {
+        this.update(tmp);
+        this.draw();
+    }
     this.lastTimeRender = now;
 };
 
-Game.prototype.startGame = function () {
+Game.prototype.run = function () {
     console.log("startGame with fps: " + this.fps);
     this.addEventListener();
     this.board.currentBrick = this.factoryBrick.createBrick();
     this.lastTimeRender = getTimestamp();
     var self = this;
-    this._intervalId = setInterval(function () {
+    setInterval(function () {
         self.mainLoop();
     }, 1000 / this.fps);
 };
 
+Game.prototype.startGame = function () {
+    this.isPlay = true;
+};
+
 Game.prototype.stopGame = function () {
-    if (this._intervalId !== -1) {
-        clearInterval(this._intervalId);
-    }
+    this.isPlay = false;
+};
+
+Game.prototype.checkEndGame = function () {
+
 };
 
 Game.prototype.addEventListener = function () {
@@ -433,38 +441,43 @@ Game.prototype.addEventListener = function () {
             case KEY.DOWN:
                 keyActionQueue.push(MOVE.DOWN);
                 break;
+            case KEY.SPACE:
+                keyActionQueue.push(MOVE.PAUSE);
+                break;
         }
         ev.preventDefault();
-    }
+    };
     document.addEventListener('keydown', keyPressedEvent, false);
-    // window.addEventListener('resize', resize, false);
 };
 
 Game.prototype.handleKeyEvents = function (keyAction) {
     console.log("handlekeyevent: " + keyAction);
-    if (keyAction === MOVE.LEFT || keyAction === MOVE.RIGHT || keyAction === MOVE.DOWN) {
-        this.board.currentBrick.potentialMoveBrick(keyAction);
-    } else if (keyAction === MOVE.ROTATION) {
-        console.log("ROTATION");
-        this.board.currentBrick.potentialRotate();
-        if (this.board.isPossibleToRotate()) {
-            this.board.currentBrick.applyRotation();
-        }
+    switch (keyAction) {
+        case MOVE.LEFT:
+        case MOVE.RIGHT:
+        case MOVE.DOWN:
+            this.board.currentBrick.potentialMoveBrick(keyAction);
+            break;
+        case MOVE.ROTATION:
+            this.board.currentBrick.potentialRotate();
+            if (this.board.isPossibleToRotate()) {
+                this.board.currentBrick.applyRotation();
+            }
+            console.log(this.stopGame);
+            break;
+        case MOVE.PAUSE:
+            this.handlePause();
+            break;
     }
-
 };
 
-// function resize(event) {
-//   canvas.width   = canvas.clientWidth;  // set canvas logical size equal to its physical size
-//   canvas.height  = canvas.clientHeight; // (ditto)
-//   ucanvas.width  = ucanvas.clientWidth;
-//   ucanvas.height = ucanvas.clientHeight;
-//   dx = canvas.width  / nx; // pixel size of a single tetris block
-//   dy = canvas.height / ny; // (ditto)
-//   invalidate();
-//   invalidateNext();
-// }
-
+Game.prototype.handlePause = function () {
+    if (this.isPlay) {
+        this.stopGame();
+    } else {
+        this.startGame();
+    }
+};
 
 var game = new Game(30);
-game.startGame();
+game.run();
