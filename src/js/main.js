@@ -99,8 +99,9 @@ function Brick(type, widthBoard) {
     this.type = type;
     this.shape = getShapesForBrickType(this.type)[0];
     this.width = widthBoard;
-    var center = Math.round(this.width / 2);
-    this.topLeft = {row: 0, col: widthBoard / 2};
+    var center = Math.round((widthBoard - this.shape[0].length) / 2);
+
+    this.topLeft = {row: 0, col: center};
     this.potencialTopLeft = {row: this.topLeft.row, col: this.topLeft.col};
     this.potencialShape = 0;
 }
@@ -175,6 +176,7 @@ function Board(rows, cols) {
     this.width = cols;
     this.filled = this.private.createBoard(rows, cols);
     this.currentBrick = null;
+    this.graphicsUtils = new GraphicsUtils();
 }
 
 Board.prototype.getAbsoluteCoordinates = function (row, col) {
@@ -192,23 +194,20 @@ Board.prototype.getPotentialAbsoluteCoordinates = function (row, col) {
 Board.prototype.showBoard = function () {
     var c = document.getElementById("boardCanvas");
     var ctx = c.getContext("2d");
+    var self = this;
     var imgDimension = 45;
-    var paddingHeight = 2;
-    var paddingWidth = 2;
+    var padding = 2;
 
-    var img_create = function (src) {
-        var img = new Image();
-        img.src = "img/block_" + src + ".png";
-        img.width = imgDimension;
-        img.height = imgDimension;
-        return img;
+    var drawImage = function (typeBrick, x, y) {
+        var img = self.graphicsUtils.blockImgCreate(typeBrick, imgDimension);
+        var abs_x = x * img.width + x * padding;
+        var abs_y = y * imgDimension + y * padding;
+        ctx.drawImage(img, abs_x, abs_y);
     };
-
-    var toPrintBoard = this.private.createBoard(16,10);
 
     for (var row in this.filled) {
         for (var col in this.filled[row]) {
-            toPrintBoard[row][col] = this.filled[row][col];
+            drawImage(this.filled[row][col], col, row);
         }
     }
 
@@ -216,17 +215,8 @@ Board.prototype.showBoard = function () {
         for (var col in this.currentBrick.shape[row]) {
             if (this.currentBrick.shape[row][col] !== BRICK_TYPE.NO_BRICK) {
                 var coordinates = this.getAbsoluteCoordinates(row, col);
-                toPrintBoard[coordinates.row][coordinates.col] = this.currentBrick.type;
+                drawImage(this.currentBrick.type, coordinates.col, coordinates.row);
             }
-        }
-    }
-
-    for (var row in toPrintBoard) {
-        var y = row * imgDimension + row * paddingHeight;
-        for (var col in toPrintBoard[row]) {
-            var img = img_create(toPrintBoard[row][col]);
-            var x = col * img.width + col * paddingWidth;
-            ctx.drawImage(img, x, y);
         }
     }
 };
@@ -302,12 +292,9 @@ Board.prototype.isPossibleToRotate = function () {
     for (var row in potentialShape) {
         for (var col in potentialShape[row]) {
             if (potentialShape[row][col] !== 0) {
-                var potentialRow = parseInt(row) + parseInt(this.currentBrick.potencialTopLeft.row);
-                var potentialCol = parseInt(col) + parseInt(this.currentBrick.potencialTopLeft.col);
-                var isInBoard = this.isInBoard(potentialRow, potentialCol);
-                console.log("porencialRow: " + potentialRow + " is in table: " + isInBoard);
-
-                if (!(isInBoard && this.filled[potentialRow][potentialCol] === BRICK_TYPE.NO_BRICK)) {
+                var coordinates = this.getPotentialAbsoluteCoordinates(row, col);
+                var isInBoard = this.isInBoard(coordinates.row, coordinates.col);
+                if (!(isInBoard && this.filled[coordinates.row][coordinates.col] === BRICK_TYPE.NO_BRICK)) {
                     return false;
                 }
             }
@@ -329,14 +316,10 @@ Board.prototype.checkFillInRows = function () {
     };
 
     for (var row in this.filled) {
-        console.log("pkb row: " + this.filled[row])
         if (isRowFullFill(this.filled[row])) {
-            console.log("pkb add row : " + row);
             rowToDelete.push(row);
         }
     }
-
-    console.log("pkb rowToDelete" + rowToDelete);
 
     while (rowToDelete.length > 0) {
         var rowDelete = rowToDelete.pop();
@@ -344,6 +327,57 @@ Board.prototype.checkFillInRows = function () {
         var emptyLine = new Array(this.width).fill(BRICK_TYPE.NO_BRICK);
         this.filled.unshift(emptyLine);
     }
+};
+
+function GraphicsUtils() {
+    var self = this;
+    var createCenterClassImg = function (src, width, height) {
+        var img = self.createImg(src, width, height);
+        img.className = 'center'
+        return img;
+    };
+
+    this.fadeOut = document.createElement('div');
+    this.fadeOut.className = 'overlay';
+
+    this.pauseImg = createCenterClassImg("img/pause.png", 200,200);
+    this.awesomeImg = createCenterClassImg("img/awesome.png", 372, 158);
+    this.gameOverImg = createCenterClassImg("img/game_over.png", 482, 527);
+    this.rockImg = createCenterClassImg("img/you_rock.png", 400, 207);
+};
+
+GraphicsUtils.prototype.createImg = function(src, width, height) {
+    var img = new Image();
+    img.src = src;
+    img.width = width;
+    img.height = height;
+    return img;
+};
+
+GraphicsUtils.prototype.blockImgCreate = function (src, imgDimension) {
+    return this.createImg("img/block_" + src + ".png", imgDimension, imgDimension);
+};
+
+GraphicsUtils.prototype.fadeOutBackground = function () {
+    document.getElementById("screen").appendChild(this.fadeOut);
+};
+
+GraphicsUtils.prototype.fadeInBackground = function () {
+    var list = document.getElementById("screen");
+
+    while (list.hasChildNodes()) {
+        list.removeChild(list.firstChild);
+    }
+};
+
+GraphicsUtils.prototype.showPauseImg = function () {
+    this.fadeOutBackground();
+    document.getElementById("screen").appendChild(this.pauseImg);
+};
+
+GraphicsUtils.prototype.showGameOver = function () {
+    this.fadeOutBackground();
+    document.getElementById("screen").appendChild(this.gameOverImg);
 };
 
 function Game(fps) {
@@ -354,8 +388,10 @@ function Game(fps) {
     this.isPlay = true;
     this.board = new Board(16, 10);
     this.factoryBrick = new FactoryBrick(10);
+    this.graphicsUtils = new GraphicsUtils();
     this.keyActionQueue = [];
     this.nextBrick = null;
+
 }
 
 Game.prototype.update = function (idt) {
@@ -380,7 +416,7 @@ Game.prototype.update = function (idt) {
             this.board.fillBrickInBoard();
             this.board.checkFillInRows();
             this.board.currentBrick = this.factoryBrick.createBrick();
-            this.checkEndGame();
+            this.isEndGame();
         }
     }
 };
@@ -395,8 +431,8 @@ Game.prototype.mainLoop = function () {
     var tmp = Math.min(1, (now - this.lastTimeRender) / 1000.00)
     console.log("last time: " + this.lastTimeRender + " time is :" + now + " send to update: " + tmp);
     this.handleKeyEvents(this.keyActionQueue.shift());
-    if (this.isPlay) {
         this.update(tmp);
+    if (this.isPlay) {
         this.draw();
     }
     this.lastTimeRender = now;
@@ -421,8 +457,11 @@ Game.prototype.stopGame = function () {
     this.isPlay = false;
 };
 
-Game.prototype.checkEndGame = function () {
-
+Game.prototype.isEndGame = function () {
+    if (!this.board.isPossibleToMove()) {
+        this.stopGame();
+        this.graphicsUtils.showGameOver();
+    }
 };
 
 Game.prototype.addEventListener = function () {
@@ -474,10 +513,14 @@ Game.prototype.handleKeyEvents = function (keyAction) {
 Game.prototype.handlePause = function () {
     if (this.isPlay) {
         this.stopGame();
+        this.graphicsUtils.showPauseImg();
     } else {
         this.startGame();
+        this.graphicsUtils.fadeInBackground();
     }
 };
+
+
 
 var game = new Game(30);
 game.run();
