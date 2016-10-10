@@ -1,29 +1,42 @@
 <!doctype html>
 <html class="no-js" lang="">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" type="text/css" href="css/main.css">
-        <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
-        <script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
-        <script src="https://code.createjs.com/soundjs-0.6.2.min.js"></script></head>
-        <script src="js/main.js"></script>
-    </head>
-    <body>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script src="https://code.createjs.com/easeljs-0.8.2.min.js"></script>
+    <script src="https://code.createjs.com/tweenjs-0.6.2.min.js"></script>
+    <script src="https://code.createjs.com/soundjs-0.6.2.min.js"></script>
 
-    <div id="screen" class="screen"></div>
+    <script src="js/Const/Const.js"></script>
+    <script src="js/Utils/Util.js"></script>
+    <script src="js/Model/Brick.js"></script>
+    <script src="js/Utils/FactoryBrick.js"></script>
+    <script src="js/Model/Board.js"></script>
+    <script src="js/Utils/GraphicsUtils.js"></script>
+    <script src="js/Utils/SoundsUtils.js"></script>
+    <script src="js/Controller/Game.js"></script>
+    <script src="js/main.js"></script>
+</head>
+<body>
+    <div id="screen" class="screen">
+        <canvas id="canvasAnimate" class="center" width="500" height="500"
+                style="position: absolute; left: 0; top: 0; z-index: 100;"></canvas>
+    </div>
+
+    <div class="container">
         <div class="board">
             <div class="board_usage">
                 <canvas id="boardCanvas" width="592" height="871">
                     Your browser does not support the HTML5 canvas tag.
                 </canvas>
             </div>
-
         </div>
+        <div class="score_bg" id="score_container">0</div>
+    </div>
 
-
-    </body>
+</body>
 </html>
