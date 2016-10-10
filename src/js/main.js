@@ -304,6 +304,7 @@ Board.prototype.isPossibleToRotate = function () {
 };
 
 Board.prototype.checkFillInRows = function () {
+    var ret = false;
     var rowToDelete = [];
 
     var isRowFullFill = function (row) {
@@ -326,7 +327,10 @@ Board.prototype.checkFillInRows = function () {
         this.filled.splice(rowDelete, 1);
         var emptyLine = new Array(this.width).fill(BRICK_TYPE.NO_BRICK);
         this.filled.unshift(emptyLine);
+        ret = true;
     }
+
+    return ret;
 };
 
 function GraphicsUtils() {
@@ -380,6 +384,44 @@ GraphicsUtils.prototype.showGameOver = function () {
     document.getElementById("screen").appendChild(this.gameOverImg);
 };
 
+function SoundsUtils() {
+    this.backgroundSoundId = "backgroundSoundId";
+    this.clickSoundId = "clickSoundId";
+    this.clearRowId = "clearRowId";
+    this.loadSounds();
+};
+
+SoundsUtils.prototype.loadSounds = function() {
+    this.bgSoundInstance = createjs.Sound.registerSound("sound/background_sound.mp3", this.backgroundSoundId);
+    this.clearRowInstance = createjs.Sound.registerSound("sound/clear_row.mp3", this.clearRowId);
+    this.clickBrickInstance = createjs.Sound.registerSound("sound/click_brick.mp3", this.clickSoundId);
+};   
+
+SoundsUtils.prototype.playBackgroundSound = function() {
+    if(createjs.Sound.loadComplete(this.bgSoundInstance)) {
+        var ppc = new createjs.PlayPropsConfig().set({interrupt: createjs.Sound.INTERRUPT_ANY, loop: -1, volume: 0.5});
+        createjs.Sound.play(this.backgroundSoundId, ppc);
+    }
+};     
+
+SoundsUtils.prototype.stopBackgroundSound = function() {
+    createjs.Sound.stop(this.backgroundSoundId);
+};
+
+SoundsUtils.prototype.playBrickClick = function() {
+    if(createjs.Sound.loadComplete(this.clickSoundId)) {
+        var ppc = new createjs.PlayPropsConfig().set({interrupt: createjs.Sound.INTERRUPT_ANY, loop: 0, volume: 0.7});
+        createjs.Sound.play(this.clickSoundId, ppc);
+    }
+};
+
+SoundsUtils.prototype.playClearRow = function() {
+    if(createjs.Sound.loadComplete(this.clearRowId)) {
+        var ppc = new createjs.PlayPropsConfig().set({interrupt: createjs.Sound.INTERRUPT_ANY, loop: 0, volume: 0.7});
+        createjs.Sound.play(this.clearRowId, ppc);
+    }
+};
+
 function Game(fps) {
     this.fps = fps;
     this.lastTimeRender = 0;
@@ -389,6 +431,7 @@ function Game(fps) {
     this.board = new Board(16, 10);
     this.factoryBrick = new FactoryBrick(10);
     this.graphicsUtils = new GraphicsUtils();
+    this.soundsUtils = new SoundsUtils();
     this.keyActionQueue = [];
     this.nextBrick = null;
 
@@ -414,7 +457,9 @@ Game.prototype.update = function (idt) {
             this.board.currentBrick.applyPotentialMove();
         } else {
             this.board.fillBrickInBoard();
-            this.board.checkFillInRows();
+            if (this.board.checkFillInRows()) {
+                this.soundsUtils.playClearRow();
+            }
             this.board.currentBrick = this.factoryBrick.createBrick();
             this.isEndGame();
         }
@@ -441,6 +486,7 @@ Game.prototype.mainLoop = function () {
 Game.prototype.run = function () {
     console.log("startGame with fps: " + this.fps);
     this.addEventListener();
+    this.soundsUtils.playBackgroundSound();
     this.board.currentBrick = this.factoryBrick.createBrick();
     this.lastTimeRender = getTimestamp();
     var self = this;
@@ -491,6 +537,7 @@ Game.prototype.addEventListener = function () {
 
 Game.prototype.handleKeyEvents = function (keyAction) {
     console.log("handlekeyevent: " + keyAction);
+    this.soundsUtils.playBrickClick();
     switch (keyAction) {
         case MOVE.LEFT:
         case MOVE.RIGHT:
