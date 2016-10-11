@@ -77,7 +77,10 @@ Board.prototype.isPossibleToMove = function () {
             if (this.currentBrick.shape[row][col] !== BRICK_TYPE.NO_BRICK) {
                 var coordinates = this.getPotentialAbsoluteCoordinates(row, col);
                 var isInBoard = this.isInBoard(coordinates.row, coordinates.col);
-                if (!(isInBoard && this.filled[coordinates.row][coordinates.col] === BRICK_TYPE.NO_BRICK)) {
+                if (coordinates.col < 0 || coordinates.col >= this.width) {
+                    this.currentBrick.resetPotentialMove();
+                    return true;
+                } else if (!(isInBoard && this.filled[coordinates.row][coordinates.col] === BRICK_TYPE.NO_BRICK)) {
                     return false;
                 }
             }
@@ -88,42 +91,6 @@ Board.prototype.isPossibleToMove = function () {
 
 Board.prototype.isInBoard = function (row, col) {
     return col >= 0 && col < this.width && row < this.height;
-};
-
-Board.prototype.isPossibleToGoDown = function () {
-    var checkLastRow = function (row) {
-        for (var i in row) {
-            if (row[i] !== BRICK_TYPE.NO_BRICK) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    this.currentBrick.resetPotentialMove();
-    this.currentBrick.potentialMoveBrick(MOVE.DOWN);
-    var tmpShape = this.currentBrick.shape.slice(0, this.currentBrick.shape.length);
-    var lastShapeRow;
-
-    do {
-        var tryRow = tmpShape.pop();
-        if (checkLastRow(tryRow)) {
-            lastShapeRow = tryRow;
-            break;
-        }
-    } while (tmpShape.length > 0);
-
-    for (var col in lastShapeRow) {
-        if (lastShapeRow[col] !== BRICK_TYPE.NO_BRICK) {
-            var potentialRow = parseInt(this.currentBrick.shape.length - 1) + parseInt(this.currentBrick.potencialTopLeft.row);
-            var potentialCol = parseInt(col) + parseInt(this.currentBrick.potencialTopLeft.col);
-            var isInBoard = this.isInBoard(potentialRow, potentialCol);
-            if (!(isInBoard && this.filled[potentialRow][potentialCol] === BRICK_TYPE.NO_BRICK)) {
-                return false;
-            }
-        }
-    }
-    return true;
 };
 
 Board.prototype.isPossibleToRotate = function () {

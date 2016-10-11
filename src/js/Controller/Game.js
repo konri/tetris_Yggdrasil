@@ -27,13 +27,6 @@ Game.prototype.update = function (idt) {
     if (this.board.isPossibleToMove()) {
         this.board.currentBrick.applyPotentialMove();
     } else {
-        var isPossibleToGoDown = this.board.isPossibleToGoDown();
-        console.log("possible touch: " + isPossibleToGoDown);
-        if (isPossibleToGoDown) {
-
-            console.log("possible to go down: ");
-            this.board.currentBrick.applyPotentialMove();
-        } else {
             this.board.fillBrickInBoard();
             var checkFillInRows = this.board.checkFillInRows();
             if (checkFillInRows > 0) {
@@ -48,7 +41,6 @@ Game.prototype.update = function (idt) {
             }
             this.board.currentBrick = this.factoryBrick.createBrick();
             this.isEndGame();
-        }
     }
 };
 
